@@ -1,4 +1,8 @@
+"use client";
+
+import network from "@/utils/network";
 import "./globals.css";
+import { ThirdwebProvider } from "@thirdweb-dev/react";
 
 export const metadata = {
 	title: "Ebay Clone",
@@ -12,7 +16,9 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body>{children}</body>
+			<ThirdwebProvider activeChain={network}>
+				<body>{children}</body>
+			</ThirdwebProvider>
 		</html>
 	);
 }
