@@ -2,12 +2,14 @@
 
 import Header from "@/components/Header";
 import { useAddress, useContract } from "@thirdweb-dev/react";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 type Props = {};
 
 const addItem = (props: Props) => {
 	const address = useAddress();
+	const router = useRouter();
 	const { contract } = useContract(
 		process.env.NEXT_PUBLIC_COLLECTION_CONTRACT,
 		"nft-collection"
@@ -38,6 +40,13 @@ const addItem = (props: Props) => {
 
 		try {
 			const tx = await contract.mintTo(address, metadata);
+
+			const receipt = tx.receipt; // the transaction receipt
+			const tokenId = tx.id; // the id of the NFT minted
+			const nft = await tx.data(); // (optional) fetch details of minted NFT
+
+			console.log(receipt, tokenId, nft);
+			router.push("/");
 		} catch (error) {
 			console.error(error);
 		}
