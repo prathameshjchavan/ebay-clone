@@ -1,7 +1,7 @@
 import "../globals.css";
 
 export const metadata = {
-	title: "Ebay Clone - Add Item",
+	title: "Ebay Clone - Create Listing",
 };
 
 export default function RootLayout({
