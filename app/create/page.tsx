@@ -1,23 +1,30 @@
 "use client";
 
 import Header from "@/components/Header";
+import network from "@/utils/network";
 import {
 	useAddress,
 	useContract,
 	MediaRenderer,
-	useChain,
+	useSwitchChain,
 	useNetworkMismatch,
 	useOwnedNFTs,
 	useCreateAuctionListing,
 	useCreateDirectListing,
 	NFT,
+	NATIVE_TOKENS,
+	NATIVE_TOKEN_ADDRESS,
 } from "@thirdweb-dev/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 type Props = {};
 
 const page = (props: Props) => {
+	const [selectedNft, setSelectedNft] = useState<NFT>();
+
 	const address = useAddress();
+	const router = useRouter();
 	const { contract } = useContract(
 		process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT,
 		"marketplace"
@@ -27,8 +34,61 @@ const page = (props: Props) => {
 		"nft-collection"
 	);
 	const ownedNFTS = useOwnedNFTs(collectionContract, address);
-	const [selectedNft, setSelectedNft] = useState<NFT>();
-	console.log(selectedNft);
+	const networkMismatch = useNetworkMismatch();
+	const switchChain = useSwitchChain();
+	const {
+		mutate: createDirectListing,
+		isLoading: isLoadingDirect,
+		error: errorDirect,
+	} = useCreateDirectListing(contract);
+	const {
+		mutate: createAuctionListing,
+		isLoading: isLoadingAuction,
+		error: errorAuction,
+	} = useCreateAuctionListing(contract);
+
+	const handleCreateListing = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+
+		if (networkMismatch) {
+			switchChain && switchChain(network);
+			return;
+		}
+
+		if (!selectedNft) return;
+
+		const target = e.target as typeof e.target & {
+			elements: {
+				listingType: { value: "directListing" | "auctionListing" };
+				price: { value: string };
+			};
+		};
+
+		const { listingType, price } = target.elements;
+
+		if (listingType.value === "directListing") {
+			createDirectListing(
+				{
+					assetContractAddress: process.env.NEXT_PUBLIC_COLLECTION_CONTRACT!,
+					tokenId: selectedNft.metadata.id,
+					currencyContractAddress: NATIVE_TOKEN_ADDRESS,
+					listingDurationInSeconds: 60 * 60 * 24 * 7, // 1 week
+					quantity: 1,
+					buyoutPricePerToken: price.value,
+					startTimestamp: new Date(),
+				},
+				{
+					onSuccess(data, variables, context) {
+						console.log("SUCCESS: ", data, variables, context);
+						router.push("/");
+					},
+					onError(error, variables, context) {
+						console.log("SUCCESS: ", error, variables, context);
+					},
+				}
+			);
+		}
+	};
 
 	return (
 		<div>
@@ -48,7 +108,11 @@ const page = (props: Props) => {
 					{ownedNFTS.data?.map((nft) => (
 						<div
 							onClick={() => setSelectedNft(nft)}
-							className="flex flex-col w-64 space-y-2 card border-2 bg-gray-100"
+							className={`flex flex-col w-64 space-y-2 card border-2 bg-gray-100 ${
+								nft.metadata.id === selectedNft?.metadata.id
+									? "border-black"
+									: "border-transparent"
+							}`}
 							key={nft.metadata.id}
 						>
 							<MediaRenderer
@@ -60,6 +124,46 @@ const page = (props: Props) => {
 						</div>
 					))}
 				</div>
+
+				{selectedNft && (
+					<form onSubmit={handleCreateListing}>
+						<div className="flex flex-col p-10">
+							<div className="grid grid-cols-2 gap-5">
+								<label className="border-r font-light">
+									Direct Listing / Fixed Price
+								</label>
+								<input
+									className="ml-auto h-10 w-10"
+									type="radio"
+									name="listingType"
+									value="directListing"
+								/>
+
+								<label className="border-r font-light">Auction</label>
+								<input
+									className="ml-auto h-10 w-10"
+									type="radio"
+									name="listingType"
+									value="auctionListing"
+								/>
+
+								<label className="border-r font-light">Price</label>
+								<input
+									type="text"
+									name="price"
+									placeholder="0.05"
+									className="bg-gray-100 p-5"
+								/>
+							</div>
+							<button
+								type="submit"
+								className="bg-blue-600 text-white rounded-lg p-4 mt-8"
+							>
+								Create Listing
+							</button>
+						</div>
+					</form>
+				)}
 			</main>
 		</div>
 	);
