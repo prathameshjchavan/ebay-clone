@@ -88,6 +88,30 @@ const page = (props: Props) => {
 				}
 			);
 		}
+
+		if (listingType.value === "auctionListing") {
+			createAuctionListing(
+				{
+					assetContractAddress: process.env.NEXT_PUBLIC_COLLECTION_CONTRACT!,
+					buyoutPricePerToken: price.value,
+					tokenId: selectedNft.metadata.id,
+					startTimestamp: new Date(),
+					currencyContractAddress: NATIVE_TOKEN_ADDRESS,
+					listingDurationInSeconds: 60 * 60 * 24 * 7, // 1 week
+					quantity: 1,
+					reservePricePerToken: 0,
+				},
+				{
+					onSuccess(data, variables, context) {
+						console.log("SUCCESS: ", data, variables, context);
+						router.push("/");
+					},
+					onError(error, variables, context) {
+						console.log("SUCCESS: ", error, variables, context);
+					},
+				}
+			);
+		}
 	};
 
 	return (
