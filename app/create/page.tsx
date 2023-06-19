@@ -79,7 +79,6 @@ const page = (props: Props) => {
 				},
 				{
 					onSuccess(data, variables, context) {
-						console.log("SUCCESS: ", data, variables, context);
 						router.push("/");
 					},
 					onError(error, variables, context) {
@@ -103,7 +102,6 @@ const page = (props: Props) => {
 				},
 				{
 					onSuccess(data, variables, context) {
-						console.log("SUCCESS: ", data, variables, context);
 						router.push("/");
 					},
 					onError(error, variables, context) {
