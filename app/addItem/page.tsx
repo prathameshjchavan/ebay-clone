@@ -2,6 +2,7 @@
 
 import Header from "@/components/Header";
 import { useAddress, useContract } from "@thirdweb-dev/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -41,9 +42,9 @@ const AddItemPage = (props: Props) => {
 		try {
 			const tx = await contract.mintTo(address, metadata);
 
-			const receipt = tx.receipt; // the transaction receipt
-			const tokenId = tx.id; // the id of the NFT minted
-			const nft = await tx.data(); // (optional) fetch details of minted NFT
+			// const receipt = tx.receipt; // the transaction receipt
+			// const tokenId = tx.id; // the id of the NFT minted
+			// const nft = await tx.data(); // (optional) fetch details of minted NFT
 
 			router.push("/");
 		} catch (error) {
@@ -59,14 +60,16 @@ const AddItemPage = (props: Props) => {
 				<h1 className="text-4xl font-bold">Add an Item to the Marketplace</h1>
 				<h2 className="text-xl font-semibold pt-5">Item Details</h2>
 				<p className="pb-5 ">
-					By adding an item to the marketplace, you're essentially Minting an
-					NFT of the item into your wallet which we can then list for sale!
+					By adding an item to the marketplace, you&apos;re essentially Minting
+					an NFT of the item into your wallet which we can then list for sale!
 				</p>
 
 				<div className="flex flex-col justify-center items-center md:flex-row md:space-x-5 pt-5">
-					<img
+					<Image
 						className="border h-80 w-80 object-contain"
 						src={preview || "https://links.papareact.com/ucj"}
+						width={320}
+						height={320}
 						alt=""
 					/>
 

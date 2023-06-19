@@ -124,7 +124,7 @@ const CreatePage = (props: Props) => {
 
 				<hr className="mb-5" />
 
-				<p>Below you will find the NFT's you own in your wallet</p>
+				<p>Below you will find the NFT&apos;s you own in your wallet</p>
 
 				<div className="flex overflow-x-auto space-x-2 p-4">
 					{ownedNFTS.data?.map((nft) => (
