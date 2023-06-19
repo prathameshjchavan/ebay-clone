@@ -20,7 +20,7 @@ import { useState } from "react";
 
 type Props = {};
 
-const page = (props: Props) => {
+const CreatePage = (props: Props) => {
 	const [selectedNft, setSelectedNft] = useState<NFT>();
 
 	const address = useAddress();
@@ -191,4 +191,4 @@ const page = (props: Props) => {
 	);
 };
 
-export default page;
+export default CreatePage;

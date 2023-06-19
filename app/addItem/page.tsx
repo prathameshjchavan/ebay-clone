@@ -7,7 +7,7 @@ import { useState } from "react";
 
 type Props = {};
 
-const addItem = (props: Props) => {
+const AddItemPage = (props: Props) => {
 	const address = useAddress();
 	const router = useRouter();
 	const { contract } = useContract(
@@ -116,4 +116,4 @@ const addItem = (props: Props) => {
 	);
 };
 
-export default addItem;
+export default AddItemPage;
