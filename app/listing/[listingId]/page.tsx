@@ -8,6 +8,7 @@ import {
 	useContract,
 	useListing,
 } from "@thirdweb-dev/react";
+import Countdown from "react-countdown";
 import React, { Fragment, useEffect, useState } from "react";
 
 type Props = { params: { listingId: string } };
@@ -35,9 +36,11 @@ const ListingPage = ({ params }: Props) => {
 		}
 
 		if (listing.type === ListingType.Auction) {
-			return "Enter Bid Amount";
+			if (!minimumNextBid?.displayValue) return "Enter Bid Amount";
 
-			// TODO: Improve bid amount...
+			return Number(minimumNextBid.displayValue) === 0
+				? "Enter Bid Amount"
+				: `${minimumNextBid.displayValue} ${minimumNextBid.symbol} or more`;
 		}
 	};
 
@@ -61,8 +64,6 @@ const ListingPage = ({ params }: Props) => {
 			fetchMinNextBid();
 		}
 	}, [params.listingId, contract, listing]);
-
-	console.log({ minimumNextBid });
 
 	return (
 		<div>
@@ -127,10 +128,16 @@ const ListingPage = ({ params }: Props) => {
 								{listing.type === ListingType.Auction && (
 									<Fragment>
 										<p>Current Minimum Bid:</p>
-										<p>...</p>
+										<p className="font-bold">
+											{minimumNextBid?.displayValue} {minimumNextBid?.symbol}
+										</p>
 
 										<p>Time Remaining:</p>
-										<p>...</p>
+										<Countdown
+											date={
+												Number(listing.endTimeInEpochSeconds.toString()) * 1000
+											}
+										/>
 									</Fragment>
 								)}
 
