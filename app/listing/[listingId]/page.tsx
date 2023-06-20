@@ -41,6 +41,29 @@ const ListingPage = ({ params }: Props) => {
 		}
 	};
 
+	const fetchMinNextBid = async () => {
+		if (!params.listingId || !contract) return;
+
+		const { displayValue, symbol } = await contract.auction.getMinimumNextBid(
+			params.listingId
+		);
+
+		setMinimumNextBid({
+			displayValue,
+			symbol,
+		});
+	};
+
+	useEffect(() => {
+		if (!params.listingId || !contract || !listing) return;
+
+		if (listing.type === ListingType.Auction) {
+			fetchMinNextBid();
+		}
+	}, [params.listingId, contract, listing]);
+
+	console.log({ minimumNextBid });
+
 	return (
 		<div>
 			<Header />
