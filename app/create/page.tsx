@@ -51,7 +51,7 @@ const CreatePage = (props: Props) => {
 		e.preventDefault();
 
 		if (networkMismatch) {
-			switchChain && switchChain(network);
+			switchChain(network);
 			return;
 		}
 

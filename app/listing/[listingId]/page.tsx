@@ -7,9 +7,14 @@ import {
 	MediaRenderer,
 	useContract,
 	useListing,
+	useSwitchChain,
+	useNetworkMismatch,
+	useBuyNow,
 } from "@thirdweb-dev/react";
 import Countdown from "react-countdown";
 import React, { Fragment, useEffect, useState } from "react";
+import network from "@/utils/network";
+import { useRouter } from "next/navigation";
 
 type Props = { params: { listingId: string } };
 
@@ -27,6 +32,11 @@ const ListingPage = ({ params }: Props) => {
 		displayValue: string;
 		symbol: string;
 	}>();
+	const { mutate: buyNow } = useBuyNow(contract);
+	const networkMismatch = useNetworkMismatch();
+	const switchChain = useSwitchChain();
+	const [bidAmount, setBidAmount] = useState("");
+	const router = useRouter();
 
 	const formatPlaceholder = () => {
 		if (!listing) return;
@@ -55,6 +65,49 @@ const ListingPage = ({ params }: Props) => {
 			displayValue,
 			symbol,
 		});
+	};
+
+	const buyNft = () => {
+		if (networkMismatch) {
+			switchChain(network);
+			return;
+		}
+
+		if (!params.listingId || !contract || !listing) return;
+
+		buyNow(
+			{ id: params.listingId, buyAmount: 1, type: listing.type },
+			{
+				onSuccess(data, variables, context) {
+					alert("NFT bought successfully");
+					console.log("SUCCESS", data, variables, context);
+					router.replace("/");
+				},
+				onError(error, variables, context) {
+					alert("ERROR: NFT could not be bought");
+					console.log("ERROR", error, variables, context);
+				},
+			}
+		);
+	};
+
+	const createBidOrOffer = async () => {
+		try {
+			if (networkMismatch) {
+				switchChain(network);
+				return;
+			}
+
+			// Direct Listing
+			if (listing?.type === ListingType.Direct) {
+			}
+
+			// Auction Listing
+			if (listing?.type === ListingType.Auction) {
+			}
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	useEffect(() => {
@@ -108,7 +161,10 @@ const ListingPage = ({ params }: Props) => {
 									{listing.buyoutCurrencyValuePerToken.symbol}
 								</p>
 
-								<button className="col-start-2 mt-2 bg-blue-600 font-bold text-white rounded-full w-44 py-4 px-10">
+								<button
+									onClick={buyNft}
+									className="col-start-2 mt-2 bg-blue-600 font-bold text-white rounded-full w-44 py-4 px-10"
+								>
 									Buy Now
 								</button>
 							</div>
@@ -144,9 +200,13 @@ const ListingPage = ({ params }: Props) => {
 								<input
 									className="border p-2 rounded-lg mr-5"
 									type="text"
+									onChange={(e) => setBidAmount(e.target.value)}
 									placeholder={formatPlaceholder()}
 								/>
-								<button className="bg-red-600 font-bold text-white rounded-full w-44 py-4 px-10">
+								<button
+									onClick={createBidOrOffer}
+									className="bg-red-600 font-bold text-white rounded-full w-44 py-4 px-10"
+								>
 									{listing.type === ListingType.Direct ? "Offer" : "Bid"}
 								</button>
 							</div>
