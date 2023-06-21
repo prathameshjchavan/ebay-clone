@@ -12,6 +12,7 @@ import {
 	useBuyNow,
 	useMakeOffer,
 	useOffers,
+	useMakeBid,
 } from "@thirdweb-dev/react";
 import Countdown from "react-countdown";
 import React, { Fragment, useEffect, useState } from "react";
@@ -37,13 +38,12 @@ const ListingPage = ({ params }: Props) => {
 	}>();
 	const { mutate: buyNow } = useBuyNow(contract);
 	const { mutate: makeOffer } = useMakeOffer(contract);
+	const { mutate: makeBid } = useMakeBid(contract);
 	const { data: offers } = useOffers(contract, params.listingId);
 	const networkMismatch = useNetworkMismatch();
 	const switchChain = useSwitchChain();
 	const [bidAmount, setBidAmount] = useState("");
 	const router = useRouter();
-
-	console.log({ offers });
 
 	const formatPlaceholder = () => {
 		if (!listing) return;
@@ -98,15 +98,17 @@ const ListingPage = ({ params }: Props) => {
 		);
 	};
 
-	const createBidOrOffer = async () => {
+	const createBidOrOffer = () => {
 		try {
 			if (networkMismatch) {
 				switchChain(network);
 				return;
 			}
 
+			if (!params.listingId || !listing || !contract) return;
+
 			// Direct Listing
-			if (listing?.type === ListingType.Direct) {
+			if (listing.type === ListingType.Direct) {
 				if (
 					listing.buyoutPrice.toString() ===
 					ethers.utils.parseEther(bidAmount).toString()
@@ -118,7 +120,7 @@ const ListingPage = ({ params }: Props) => {
 				}
 
 				console.log("Buyout price not met, making offer...");
-				await makeOffer(
+				makeOffer(
 					{
 						listingId: params.listingId,
 						quantity: 1,
@@ -126,6 +128,7 @@ const ListingPage = ({ params }: Props) => {
 					},
 					{
 						onSuccess(data, variables, context) {
+							setBidAmount("");
 							alert("Offer made successfully!");
 							console.log("SUCCESS", data, variables, context);
 						},
@@ -138,7 +141,26 @@ const ListingPage = ({ params }: Props) => {
 			}
 
 			// Auction Listing
-			if (listing?.type === ListingType.Auction) {
+			if (listing.type === ListingType.Auction) {
+				console.log("Making Bid...");
+
+				makeBid(
+					{
+						listingId: params.listingId,
+						bid: bidAmount,
+					},
+					{
+						onSuccess(data, variables, context) {
+							setBidAmount("");
+							alert("Bid made successfully!");
+							console.log("SUCCESS", data, variables, context);
+						},
+						onError(error, variables, context) {
+							alert("ERROR: Bid could not be made");
+							console.log("ERROR", error, variables, context);
+						},
+					}
+				);
 			}
 		} catch (error) {
 			console.error(error);
