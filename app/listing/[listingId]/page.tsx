@@ -10,11 +10,14 @@ import {
 	useSwitchChain,
 	useNetworkMismatch,
 	useBuyNow,
+	useMakeOffer,
+	useOffers,
 } from "@thirdweb-dev/react";
 import Countdown from "react-countdown";
 import React, { Fragment, useEffect, useState } from "react";
 import network from "@/utils/network";
 import { useRouter } from "next/navigation";
+import { ethers } from "ethers";
 
 type Props = { params: { listingId: string } };
 
@@ -33,10 +36,14 @@ const ListingPage = ({ params }: Props) => {
 		symbol: string;
 	}>();
 	const { mutate: buyNow } = useBuyNow(contract);
+	const { mutate: makeOffer } = useMakeOffer(contract);
+	const { data: offers } = useOffers(contract, params.listingId);
 	const networkMismatch = useNetworkMismatch();
 	const switchChain = useSwitchChain();
 	const [bidAmount, setBidAmount] = useState("");
 	const router = useRouter();
+
+	console.log({ offers });
 
 	const formatPlaceholder = () => {
 		if (!listing) return;
@@ -100,6 +107,34 @@ const ListingPage = ({ params }: Props) => {
 
 			// Direct Listing
 			if (listing?.type === ListingType.Direct) {
+				if (
+					listing.buyoutPrice.toString() ===
+					ethers.utils.parseEther(bidAmount).toString()
+				) {
+					console.log("Buyout Price met, buying NFT...");
+
+					buyNft();
+					return;
+				}
+
+				console.log("Buyout price not met, making offer...");
+				await makeOffer(
+					{
+						listingId: params.listingId,
+						quantity: 1,
+						pricePerToken: bidAmount,
+					},
+					{
+						onSuccess(data, variables, context) {
+							alert("Offer made successfully!");
+							console.log("SUCCESS", data, variables, context);
+						},
+						onError(error, variables, context) {
+							alert("ERROR: Offer could not be made");
+							console.log("ERROR", error, variables, context);
+						},
+					}
+				);
 			}
 
 			// Auction Listing
