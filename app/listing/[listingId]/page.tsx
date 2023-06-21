@@ -231,7 +231,6 @@ const ListingPage = ({ params }: Props) => {
 								</button>
 							</div>
 
-							{/* TODO: If Direct, show offers here... */}
 							{listing.type === ListingType.Direct && offers && (
 								<div className="grid grid-cols-2 gap-y-2">
 									<p className="font-bold">Offers: </p>
@@ -241,17 +240,17 @@ const ListingPage = ({ params }: Props) => {
 										<Fragment
 											key={
 												offer.listingId +
-												offer.offerer +
+												offer.offeror +
 												offer.totalOfferAmount.toString()
 											}
 										>
 											<p className="flex items-center ml-5 text-sm italic">
 												<UserCircleIcon className="h-3 mr-2" />
-												{offer.offerer.slice(0, 5) +
+												{offer.offeror.slice(0, 5) +
 													"..." +
-													offer.offerer.slice(-5)}
+													offer.offeror.slice(-5)}
 											</p>
-											<div>
+											<div className="flex items-center space-x-10">
 												<p className="text-sm italic">
 													{ethers.utils.formatEther(offer.totalOfferAmount)}{" "}
 													{NATIVE_TOKENS[network].symbol}
@@ -262,7 +261,7 @@ const ListingPage = ({ params }: Props) => {
 														onClick={() =>
 															acceptOffer(
 																{
-																	addressOfOfferor: offer.offerer,
+																	addressOfOfferor: offer.offeror,
 																	listingId: params.listingId,
 																},
 																{
@@ -308,7 +307,6 @@ const ListingPage = ({ params }: Props) => {
 										: "Bid on this Auction"}
 								</p>
 
-								{/* TODO: Remaining time on auction goes here... */}
 								{listing.type === ListingType.Auction && (
 									<Fragment>
 										<p>Current Minimum Bid:</p>
