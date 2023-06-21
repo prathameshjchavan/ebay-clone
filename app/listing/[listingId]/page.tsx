@@ -13,6 +13,9 @@ import {
 	useMakeOffer,
 	useOffers,
 	useMakeBid,
+	NATIVE_TOKENS,
+	useAddress,
+	useAcceptDirectListingOffer,
 } from "@thirdweb-dev/react";
 import Countdown from "react-countdown";
 import React, { Fragment, useEffect, useState } from "react";
@@ -39,11 +42,13 @@ const ListingPage = ({ params }: Props) => {
 	const { mutate: buyNow } = useBuyNow(contract);
 	const { mutate: makeOffer } = useMakeOffer(contract);
 	const { mutate: makeBid } = useMakeBid(contract);
+	const { mutate: acceptOffer } = useAcceptDirectListingOffer(contract);
 	const { data: offers } = useOffers(contract, params.listingId);
 	const networkMismatch = useNetworkMismatch();
 	const switchChain = useSwitchChain();
 	const [bidAmount, setBidAmount] = useState("");
 	const router = useRouter();
+	const address = useAddress();
 
 	const formatPlaceholder = () => {
 		if (!listing) return;
@@ -227,6 +232,72 @@ const ListingPage = ({ params }: Props) => {
 							</div>
 
 							{/* TODO: If Direct, show offers here... */}
+							{listing.type === ListingType.Direct && offers && (
+								<div className="grid grid-cols-2 gap-y-2">
+									<p className="font-bold">Offers: </p>
+									<p className="font-bold">{offers.length}</p>
+
+									{offers.map((offer) => (
+										<Fragment
+											key={
+												offer.listingId +
+												offer.offerer +
+												offer.totalOfferAmount.toString()
+											}
+										>
+											<p className="flex items-center ml-5 text-sm italic">
+												<UserCircleIcon className="h-3 mr-2" />
+												{offer.offerer.slice(0, 5) +
+													"..." +
+													offer.offerer.slice(-5)}
+											</p>
+											<div>
+												<p className="text-sm italic">
+													{ethers.utils.formatEther(offer.totalOfferAmount)}{" "}
+													{NATIVE_TOKENS[network].symbol}
+												</p>
+
+												{listing.sellerAddress === address && (
+													<button
+														onClick={() =>
+															acceptOffer(
+																{
+																	addressOfOfferor: offer.offerer,
+																	listingId: params.listingId,
+																},
+																{
+																	onSuccess(data, variables, context) {
+																		alert("Offer accepted successfully!");
+																		console.log(
+																			"SUCCESS",
+																			data,
+																			variables,
+																			context
+																		);
+																		router.replace("/");
+																	},
+																	onError(error, variables, context) {
+																		alert("ERROR: Offer could not be accepted");
+																		console.log(
+																			"SUCCESS",
+																			error,
+																			variables,
+																			context
+																		);
+																	},
+																}
+															)
+														}
+														className="p-2 w-32 bg-red-500/50 rounded-lg font-bold text-xs cursor-pointer"
+													>
+														Accept Offer
+													</button>
+												)}
+											</div>
+										</Fragment>
+									))}
+								</div>
+							)}
 
 							<div className="grid grid-cols-2 space-y-2 items-center justify-end">
 								<hr className="col-span-2" />
