@@ -82,7 +82,7 @@ const CreatePage = (props: Props) => {
 						router.push("/");
 					},
 					onError(error, variables, context) {
-						console.log("SUCCESS: ", error, variables, context);
+						console.log("ERROR: ", error, variables, context);
 					},
 				}
 			);
@@ -105,7 +105,7 @@ const CreatePage = (props: Props) => {
 						router.push("/");
 					},
 					onError(error, variables, context) {
-						console.log("SUCCESS: ", error, variables, context);
+						console.log("ERROR: ", error, variables, context);
 					},
 				}
 			);

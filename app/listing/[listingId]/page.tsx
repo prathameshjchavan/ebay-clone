@@ -92,7 +92,6 @@ const ListingPage = ({ params }: Props) => {
 			{
 				onSuccess(data, variables, context) {
 					alert("NFT bought successfully");
-					console.log("SUCCESS", data, variables, context);
 					router.replace("/");
 				},
 				onError(error, variables, context) {
@@ -118,13 +117,10 @@ const ListingPage = ({ params }: Props) => {
 					listing.buyoutPrice.toString() ===
 					ethers.utils.parseEther(bidAmount).toString()
 				) {
-					console.log("Buyout Price met, buying NFT...");
-
 					buyNft();
 					return;
 				}
 
-				console.log("Buyout price not met, making offer...");
 				makeOffer(
 					{
 						listingId: params.listingId,
@@ -135,7 +131,6 @@ const ListingPage = ({ params }: Props) => {
 						onSuccess(data, variables, context) {
 							setBidAmount("");
 							alert("Offer made successfully!");
-							console.log("SUCCESS", data, variables, context);
 						},
 						onError(error, variables, context) {
 							alert("ERROR: Offer could not be made");
@@ -147,8 +142,6 @@ const ListingPage = ({ params }: Props) => {
 
 			// Auction Listing
 			if (listing.type === ListingType.Auction) {
-				console.log("Making Bid...");
-
 				makeBid(
 					{
 						listingId: params.listingId,
@@ -158,7 +151,6 @@ const ListingPage = ({ params }: Props) => {
 						onSuccess(data, variables, context) {
 							setBidAmount("");
 							alert("Bid made successfully!");
-							console.log("SUCCESS", data, variables, context);
 						},
 						onError(error, variables, context) {
 							alert("ERROR: Bid could not be made");
@@ -267,18 +259,12 @@ const ListingPage = ({ params }: Props) => {
 																{
 																	onSuccess(data, variables, context) {
 																		alert("Offer accepted successfully!");
-																		console.log(
-																			"SUCCESS",
-																			data,
-																			variables,
-																			context
-																		);
 																		router.replace("/");
 																	},
 																	onError(error, variables, context) {
 																		alert("ERROR: Offer could not be accepted");
 																		console.log(
-																			"SUCCESS",
+																			"ERROR",
 																			error,
 																			variables,
 																			context
